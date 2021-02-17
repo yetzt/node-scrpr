@@ -1,0 +1,24 @@
+{
+  "name": "scrpr",
+  "version": "0.0.1",
+  "description": "a scraper multitool",
+  "main": "scrpr.js",
+  "scripts": {},
+  "author": "yetzt <node@yetzt.me>",
+  "license": "UNLICENSE",
+  "dependencies": {
+    "needle": "^2.6.0",
+    "quu": "^0.3.0"
+  },
+  "optionalDependencies": {
+    "cheerio": "^1.0.0-rc.5",
+    "xsv": "^0.0.3",
+    "xlsx": "^0.16.9",
+    "yaml": "^1.10.0"
+  },
+  "keywords": ["scraper","scrape","ddj","crawler","scraping"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yetzt/node-scrpr"
+}
+}
