@@ -182,6 +182,9 @@ const scrpr = function(opts){
 				})(function(err, data){
 					if (err) return fn(err, false, "error");
 
+					// convert xml and json formats to strings (needle only converts text/* mime types)
+					if (data instanceof Buffer && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
+
 					// assemble and write cache
 					fs.writeFile(cachefile, JSON.stringify({
 						last: Date.now(),
