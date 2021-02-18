@@ -12,13 +12,20 @@
   },
   "optionalDependencies": {
     "cheerio": "^1.0.0-rc.5",
-    "xsv": "^0.0.3",
     "xlsx": "^0.16.9",
-    "yaml": "^1.10.0"
+    "xsv": "^0.0.3",
+    "yaml": "^1.10.0",
+    "xml2js": "^0.4.23"
   },
-  "keywords": ["scraper","scrape","ddj","crawler","scraping"],
+  "keywords": [
+    "scraper",
+    "scrape",
+    "ddj",
+    "crawler",
+    "scraping"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/yetzt/node-scrpr"
-}
+  }
 }

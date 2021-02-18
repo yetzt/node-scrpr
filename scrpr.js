@@ -13,6 +13,7 @@ const cheerio = (function(){ try { return require("cheerio"); } catch (e) { retu
 const xlsx = (function(){ try { return require("xlsx"); } catch (e) { return null; }})();
 const yaml = (function(){ try { return require("yaml"); } catch (e) { return null; }})();
 const xsv = (function(){ try { return require("xsv"); } catch (e) { return null; }})();
+const xml = (function(){ try { return require("xml2js").parseString; } catch (e) { return null; }})();
 
 const scrpr = function(opts){
 	if (!(this instanceof scrpr)) return new scrpr(opts);
@@ -84,7 +85,7 @@ const scrpr = function(opts){
 			const req_opts = {
 				...self.needle_opts,
 				...opt.needle_opts,
-				parse: (["json","xml"].indexOf(opt.parse) >=0), // needle can parse json and xml
+				parse: (opt.parse === "json"), // needle can parse json
 				headers: {
 					...opt.headers,
 					...headers
@@ -165,11 +166,11 @@ const scrpr = function(opts){
 							return next(null, data);
 
 						break;
-						case "json":
-							// done by needle
-							return next(null, data);
-						break;
 						case "xml":
+							if (xml === null) return next(new Error("xml2js not available"));
+							return xml(data, next);
+						break;
+						case "json":
 							// done by needle
 							return next(null, data);
 						break;

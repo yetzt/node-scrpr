@@ -55,7 +55,7 @@ Callback:
 * `csv` — Comma Seperated Values; `data` is an Object, parsed with [xsv](https://npmjs.com/package/xsv)
 * `tsv` — Tab Separated Values; `data` is an Object, parsed with [xsv](https://npmjs.com/package/xsv)
 * `ssv` — Semicolon Separated Values (data has been exported "as csv" with some localizations of Microsoft Excel): `data` is an Object, parsed with [xsv](https://npmjs.com/package/xsv)
-* `xml` — eXtensible Markup Language; `data` is an Object, parsed with [sax](https://npmjs.com/package/sax) by [needle](https://npmjs.com/package/needle)
+* `xml` — eXtensible Markup Language; `data` is an Object, parsed with [xml2js](https://npmjs.com/package/xml2js)
 * `json` — JavaScript object Notation; `data` is an Object, parsed natively by [needle](https://npmjs.com/package/needle)
 * `html` — HyperText Markup Language; `data` is an instance of [cheerio](https://npmjs.com/package/cheerio)
 * `yaml` — YAML Ain't Markup Language; `data` is an Object, parsed with [yaml](https://npmjs.com/package/yaml)
@@ -63,7 +63,7 @@ Callback:
 
 ## Optional dependencies
 
-`xsv`, `xlsx` and `yaml` are optional dependencies. They should be installed if their parsing is required.
+`xsv`, `xlsx`, `xml2js` and `yaml` are optional dependencies. They should be installed if their parsing is required.
 
 
 ## License
