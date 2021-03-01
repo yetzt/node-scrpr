@@ -1,6 +1,6 @@
 # scrpr
 
-xsv is a lightweight scraper multitool. it can fetch data via https, detect changes and parse the most common formats.
+scrpr is a lightweight scraper multitool. it can fetch data via https, detect changes and parse the most common formats.
 
 ## Usage Example
 
