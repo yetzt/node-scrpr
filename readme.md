@@ -45,6 +45,7 @@ Opts:
 * `parse` — format to parse, default: `null` (raw data)
 * `successCodes` — array of http status codes considered successful, default: `[ 200 ]`
 * `needle` — options passed on to `needle`, default `{}`
+* `pdf` — options passed on to `pdf.js-extract`, default `{}`
 
 Callback:
 * `err` — contains Error or `null`
@@ -61,10 +62,11 @@ Callback:
 * `html` — HyperText Markup Language; `data` is an instance of [cheerio](https://npmjs.com/package/cheerio)
 * `yaml` — YAML Ain't Markup Language; `data` is an Object, parsed with [yaml](https://npmjs.com/package/yaml)
 * `xlsx` — Office Open XML Workbook; `data` is an Object, parsed with [xlsx](https://npmjs.com/package/xlsx); `{ "<sheetname>": [ [ cell, cell, cell, ... ], ... ] }`
+* `pdf` — Portable Document Format; `data` is an Object, parsed with [pdf.js-extract](https://npmjs.com/package/pdf.js-extract);
 
 ## Optional dependencies
 
-`xsv`, `xlsx`, `xml2js` and `yaml` are optional dependencies. They should be installed if their parsing is required.
+`xsv`, `xlsx`, `xml2js`, `yaml` and `pdf.js-extract` are optional dependencies. They should be installed if their parsing is required.
 
 
 ## License

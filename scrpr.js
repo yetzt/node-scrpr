@@ -14,6 +14,7 @@ const xlsx = (function(){ try { return require("xlsx"); } catch (e) { return nul
 const yaml = (function(){ try { return require("yaml"); } catch (e) { return null; }})();
 const xsv = (function(){ try { return require("xsv"); } catch (e) { return null; }})();
 const xml = (function(){ try { return require("xml2js").parseString; } catch (e) { return null; }})();
+const pdf = (function(){ try { return require("pdf.js-extract").PDFExtract; } catch (e) { return null; }})();
 
 const scrpr = function(opts){
 	if (!(this instanceof scrpr)) return new scrpr(opts);
@@ -57,6 +58,7 @@ const scrpr = function(opts){
 		opt.method = opt.method || "get";
 		opt.data = opt.data || null;
 		opt.needle = opt.needle || {};
+		opt.pdf = opt.pdf || {};
 		opt.successCodes = opt.successCodes || [ 200 ];
 		opt.parse = opt.parse || false;
 		opt.process = opt.process || null;
@@ -172,6 +174,10 @@ const scrpr = function(opts){
 						case "xml":
 							if (xml === null) return next(new Error("xml2js not available"));
 							return xml(data, next);
+						break;
+						case "pdf":
+							if (pdf === null) return next(new Error("pdf.js-extract not available"));
+							return (new pdf()).extractBuffer(data, opts.pdf, next);
 						break;
 						case "json":
 							// done by needle
