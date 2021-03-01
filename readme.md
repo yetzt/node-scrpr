@@ -41,6 +41,7 @@ Opts:
 * `headers` — additional http headers, default: `{}`
 * `data` — http data, default: `null`
 * `cache` — use cache, default: `true`
+* `cacheid` — override cache id, default: `hash(url, opts)`
 * `parse` — format to parse, default: `null` (raw data)
 * `successCodes` — array of http status codes considered successful, default: `[ 200 ]`
 * `needle` — options passed on to `needle`, default `{}`

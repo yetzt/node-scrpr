@@ -59,8 +59,10 @@ const scrpr = function(opts){
 		opt.needle = opt.needle || {};
 		opt.successCodes = opt.successCodes || [ 200 ];
 		opt.parse = opt.parse || false;
-		
-		const cachefile = path.resolve(self.cachedir, self.hash(opt.url)+".json");
+		opt.process = opt.process || null;
+		opt.cacheid = opt.cacheid || self.hash(opt);
+				
+		const cachefile = path.resolve(self.cachedir, opt.cacheid+".json");
 
 		(function(next){
 			if (!opt.cache) return next(null);
@@ -97,10 +99,11 @@ const scrpr = function(opts){
 				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 				
-				const data_hash = self.hash((typeof data === "object") ? JSON.stringify(data) : data);
+				// calculate hash of raw data
+				const data_hash_raw = self.hash((typeof data === "object") ? JSON.stringify(data) : data);
 				
-				// check if data changed
-				if (opt.cache && cache && data_hash === cache.hash) return fn(null, false, "no-change");
+				// check if raw data changed
+				if (opt.cache && cache && data_hash_raw === cache.hash) return fn(null, false, "no-change");
 				
 				(function(next){
 					
@@ -185,15 +188,35 @@ const scrpr = function(opts){
 					// convert xml and json formats to strings (needle only converts text/* mime types)
 					if (data instanceof Buffer && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
 
-					// assemble and write cache
-					fs.writeFile(cachefile, JSON.stringify({
-						last: Date.now(),
-						hash: data_hash,
-						modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
-						etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
-					},null,"\t"), function(err){
-						if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
-						return fn(null, true, data);
+					// check for processing function
+					(function(next){
+						if (!opt.process) return next(data);
+						
+						opt.process(data, function(err, data){
+							if (err) return fn(err, false, "error");
+							return next(data);
+						});
+						
+					})(function(data){
+
+						// create hash of processed data
+						const data_hash_processed = self.hash(JSON.stringify(data));
+
+						// check if (processed) data changed
+						if (opt.cache && cache && data_hash_processed === cache.hashp) return fn(null, false, "no-change");
+
+						// assemble and write cache
+						fs.writeFile(cachefile, JSON.stringify({
+							last: Date.now(),
+							hash: data_hash_raw,
+							hashp: data_hash_processed,
+							modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
+							etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
+						},null,"\t"), function(err){
+							if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
+							return fn(null, true, data);
+						});
+						
 					});
 				});
 			});
@@ -204,9 +227,18 @@ const scrpr = function(opts){
 	};
 };
 
-
 scrpr.prototype.hash = function(v){
-	return crypto.createHash("sha256").update(v).digest("hex");
+	return crypto.createHash("sha256").update(this.stringify(v)).digest("hex");
 };
+
+// extended object serializer
+scrpr.prototype.stringify = function(v){
+	return JSON.stringify(v, function(k,v){
+		if (typeof v === "function") return v.toString();
+		if (v instanceof Date) return v.toISOString();
+		if (v instanceof Buffer) return v.toString('hex');
+		return v;
+	});
+}
 
 module.exports = scrpr;
