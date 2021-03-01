@@ -86,7 +86,7 @@ const scrpr = function(opts){
 			
 			const req_opts = {
 				...self.needle_opts,
-				...opt.needle_opts,
+				...opt.needle,
 				parse: (opt.parse === "json"), // needle can parse json
 				headers: {
 					...opt.headers,
