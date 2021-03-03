@@ -102,7 +102,7 @@ const scrpr = function(opts){
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 				
 				// calculate hash of raw data
-				const data_hash_raw = self.hash((typeof data === "object") ? JSON.stringify(data) : data);
+				const data_hash_raw = self.hash(data);
 				
 				// check if raw data changed
 				if (opt.cache && cache && data_hash_raw === cache.hash) return fn(null, false, "no-change");
@@ -168,6 +168,9 @@ const scrpr = function(opts){
 								return next(err);
 							}
 
+							// mark as cheerio
+							data.isCheerio = true;
+
 							return next(null, data);
 
 						break;
@@ -206,7 +209,7 @@ const scrpr = function(opts){
 					})(function(data){
 
 						// create hash of processed data
-						const data_hash_processed = self.hash(JSON.stringify(data));
+						const data_hash_processed = self.hash(data);
 
 						// check if (processed) data changed
 						if (opt.cache && cache && data_hash_processed === cache.hashp) return fn(null, false, "no-change");
@@ -240,6 +243,7 @@ scrpr.prototype.hash = function(v){
 // extended object serializer
 scrpr.prototype.stringify = function(v){
 	return JSON.stringify(v, function(k,v){
+		if (v&&!!v.isCheerio) return v.html();
 		if (typeof v === "function") return v.toString();
 		if (v instanceof Date) return v.toISOString();
 		if (v instanceof Buffer) return v.toString('hex');
