@@ -38,14 +38,16 @@ Scraper, delivers data
 Opts:
 * `method` — http method; default: `get`
 * `url` — URL, alternative to `url` parameter
-* `headers` — additional http headers, default: `{}`
-* `data` — http data, default: `null`
+* `headers` — additional http request headers, default: `{}`
+* `data` — http data to be sent, default: `null`
 * `cache` — use cache, default: `true`
 * `cacheid` — override cache id, default: `hash(url, opts)`
 * `parse` — format to parse, default: `null` (raw data)
 * `successCodes` — array of http status codes considered successful, default: `[ 200 ]`
 * `needle` — options passed on to `needle`, default `{}`
 * `pdf` — options passed on to `pdf.js-extract`, default `{}`
+* `preprocess(data, callback(err, data))` — modify data before parsing
+* `postprocess(data, callback(err, data))` — modify data after parsing
 
 Callback:
 * `err` — contains Error or `null`
@@ -58,7 +60,7 @@ Callback:
 * `tsv` — Tab Separated Values; `data` is an Object, parsed with [xsv](https://npmjs.com/package/xsv)
 * `ssv` — Semicolon Separated Values (data has been exported "as csv" with some localizations of Microsoft Excel): `data` is an Object, parsed with [xsv](https://npmjs.com/package/xsv)
 * `xml` — eXtensible Markup Language; `data` is an Object, parsed with [xml2js](https://npmjs.com/package/xml2js)
-* `json` — JavaScript object Notation; `data` is an Object, parsed natively by [needle](https://npmjs.com/package/needle)
+* `json` — JavaScript object Notation; `data` is an Object, parsed natively
 * `html` — HyperText Markup Language; `data` is an instance of [cheerio](https://npmjs.com/package/cheerio)
 * `yaml` — YAML Ain't Markup Language; `data` is an Object, parsed with [yaml](https://npmjs.com/package/yaml)
 * `xlsx` — Office Open XML Workbook; `data` is an Object, parsed with [xlsx](https://npmjs.com/package/xlsx); `{ "<sheetname>": [ [ cell, cell, cell, ... ], ... ] }`
