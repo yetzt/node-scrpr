@@ -104,7 +104,7 @@ const scrpr = function(opts){
 				
 				// preprocess
 				(function(next){
-					if (!opt.preprocess) return next(null, data);
+					if (!opt.preprocess) return next(data);
 
 					opt.preprocess(data, function(err, data){
 						if (err) return fn(err, false, "error");
