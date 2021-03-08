@@ -61,7 +61,8 @@ const scrpr = function(opts){
 		opt.pdf = opt.pdf || {};
 		opt.successCodes = opt.successCodes || [ 200 ];
 		opt.parse = opt.parse || false;
-		opt.process = opt.process || null;
+		opt.process = opt.process || opt.postprocess || null;
+		opt.preprocess = opt.preprocess || null;
 		opt.cacheid = opt.cacheid || self.hash(opt);
 				
 		const cachefile = path.resolve(self.cachedir, opt.cacheid+".json");
@@ -89,7 +90,7 @@ const scrpr = function(opts){
 			const req_opts = {
 				...self.needle_opts,
 				...opt.needle,
-				parse: (opt.parse === "json"), // needle can parse json
+				parse: false,
 				headers: {
 					...opt.headers,
 					...headers
@@ -101,131 +102,149 @@ const scrpr = function(opts){
 				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 				
-				// calculate hash of raw data
-				const data_hash_raw = self.hash(data);
-				
-				// check if raw data changed
-				if (opt.cache && cache && data_hash_raw === cache.hash) return fn(null, false, "no-change");
-				
+				// preprocess
 				(function(next){
-					
-					if (!opt.parse) return next(null, data);
-					// parse if needed
-					switch (opt.parse) {
-						case "csv":
-						case "tsv":
-						case "ssv":
-							if (xsv === null) return next(new Error("xsv not available"));
-						
-							var result = [];
-							xsv(self.xsv_opts[opt.parse] ).on("data", function(record){
-								result.push(record);
-							}).on("end", function(){
-								return next(null, result);
-							}).end(data);
-						
-						break;
-						case "xlsx":
-							if (xlsx === null) return next(new Error("xlsx not available"));
-							
-							// parse xlsx
-							try {
-								var table = xlsx.read(data, { type: 'buffer', cellText: false, cellDates: true });
-							} catch (err) {
-								return next(new Error("XLSX parse error: "+err));
-							}
-							
-							// export sheets
-							try {
-								var result = table.SheetNames.reduce(function(records, sheetname){
-									return records[sheetname] = xlsx.utils.sheet_to_json(table.Sheets[sheetname], { header: 1, dateNF: 'yyyy"-"mm"-"dd' }), records;
-								},{});
-							} catch (err) {
-								return next(new Error("XLSX export error: "+err));
-							}
-							
-							return next(null, result);
-							
-						break;
-						case "yaml":
-							if (yaml === null) return next(new Error("yaml not available"));
-						
-							try {
-								data = yaml.parse(data);
-							} catch (err) {
-								return next(err);
-							}
+					if (!opt.preprocess) return next(null, data);
 
-							return next(null, data);
+					opt.preprocess(data, function(err, data){
+						if (err) return fn(err, false, "error");
+						return next(data);
+					});
 
-						break;
-						case "html":
-							if (cheerio === null) return next(new Error("cheerio not available"));
-						
-							try {
-								data = cheerio.load(data);
-							} catch (err) {
-								return next(err);
-							}
+				})(function(data){
 
-							// mark as cheerio
-							data.isCheerio = true;
-
-							return next(null, data);
-
-						break;
-						case "xml":
-							if (xml === null) return next(new Error("xml2js not available"));
-							return xml(data, next);
-						break;
-						case "pdf":
-							if (pdf === null) return next(new Error("pdf.js-extract not available"));
-							return (new pdf()).extractBuffer(data, opts.pdf, next);
-						break;
-						case "json":
-							// done by needle
-							return next(null, data);
-						break;
-						default:
-							return next(null, data);
-						break;
-					}
-					
-				})(function(err, data){
-					if (err) return fn(err, false, "error");
-
-					// convert xml and json formats to strings (needle only converts text/* mime types)
-					if (data instanceof Buffer && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
-
-					// check for processing function
+					// calculate hash of raw data
+					const data_hash_raw = self.hash(data);
+				
+					// check if raw data changed
+					if (opt.cache && cache && data_hash_raw === cache.hash) return fn(null, false, "no-change");
+				
 					(function(next){
-						if (!opt.process) return next(data);
+					
+						if (!opt.parse) return next(null, data);
+						// parse if needed
+						switch (opt.parse) {
+							case "csv":
+							case "tsv":
+							case "ssv":
+								if (xsv === null) return next(new Error("xsv not available"));
 						
-						opt.process(data, function(err, data){
-							if (err) return fn(err, false, "error");
-							return next(data);
+								var result = [];
+								xsv(self.xsv_opts[opt.parse] ).on("data", function(record){
+									result.push(record);
+								}).on("end", function(){
+									return next(null, result);
+								}).end(data);
+						
+							break;
+							case "xlsx":
+								if (xlsx === null) return next(new Error("xlsx not available"));
+							
+								// parse xlsx
+								try {
+									var table = xlsx.read(data, { type: 'buffer', cellText: false, cellDates: true });
+								} catch (err) {
+									return next(new Error("XLSX parse error: "+err));
+								}
+							
+								// export sheets
+								try {
+									var result = table.SheetNames.reduce(function(records, sheetname){
+										return records[sheetname] = xlsx.utils.sheet_to_json(table.Sheets[sheetname], { header: 1, dateNF: 'yyyy"-"mm"-"dd' }), records;
+									},{});
+								} catch (err) {
+									return next(new Error("XLSX export error: "+err));
+								}
+							
+								return next(null, result);
+							
+							break;
+							case "yaml":
+								if (yaml === null) return next(new Error("yaml not available"));
+						
+								try {
+									data = yaml.parse(data);
+								} catch (err) {
+									return next(err);
+								}
+
+								return next(null, data);
+
+							break;
+							case "html":
+								if (cheerio === null) return next(new Error("cheerio not available"));
+						
+								try {
+									data = cheerio.load(data);
+								} catch (err) {
+									return next(err);
+								}
+
+								// mark as cheerio
+								data.isCheerio = true;
+
+								return next(null, data);
+
+							break;
+							case "xml":
+								if (xml === null) return next(new Error("xml2js not available"));
+								return xml(data, next);
+							break;
+							case "pdf":
+								if (pdf === null) return next(new Error("pdf.js-extract not available"));
+								return (new pdf()).extractBuffer(data, opts.pdf, next);
+							break;
+							case "json":
+
+								try {
+									data = JSON.parse(data);
+								} catch (err) {
+									return next(err);
+								}
+
+								return next(null, data);
+							break;
+							default:
+								return next(null, data);
+							break;
+						}
+					
+					})(function(err, data){
+						if (err) return fn(err, false, "error");
+
+						// convert xml and json formats to strings (needle only converts text/* mime types)
+						if (data instanceof Buffer && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
+
+						// check for processing function
+						(function(next){
+							if (!opt.process) return next(data);
+						
+							opt.process(data, function(err, data){
+								if (err) return fn(err, false, "error");
+								return next(data);
+							});
+						
+						})(function(data){
+
+							// create hash of processed data
+							const data_hash_processed = self.hash(data);
+
+							// check if (processed) data changed
+							if (opt.cache && cache && data_hash_processed === cache.hashp) return fn(null, false, "no-change");
+
+							// assemble and write cache
+							fs.writeFile(cachefile, JSON.stringify({
+								last: Date.now(),
+								hash: data_hash_raw,
+								hashp: data_hash_processed,
+								modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
+								etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
+							},null,"\t"), function(err){
+								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
+								return fn(null, true, data);
+							});
+						
 						});
-						
-					})(function(data){
-
-						// create hash of processed data
-						const data_hash_processed = self.hash(data);
-
-						// check if (processed) data changed
-						if (opt.cache && cache && data_hash_processed === cache.hashp) return fn(null, false, "no-change");
-
-						// assemble and write cache
-						fs.writeFile(cachefile, JSON.stringify({
-							last: Date.now(),
-							hash: data_hash_raw,
-							hashp: data_hash_processed,
-							modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
-							etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
-						},null,"\t"), function(err){
-							if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
-							return fn(null, true, data);
-						});
-						
 					});
 				});
 			});
