@@ -109,7 +109,7 @@ const scrpr = function(opts){
 					opt.preprocess(data, function(err, data){
 						if (err) return fn(err, false, "error");
 						return next(data);
-					});
+					}, resp);
 
 				})(function(data){
 
@@ -222,7 +222,7 @@ const scrpr = function(opts){
 							opt.process(data, function(err, data){
 								if (err) return fn(err, false, "error");
 								return next(data);
-							});
+							}, resp);
 						
 						})(function(data){
 
