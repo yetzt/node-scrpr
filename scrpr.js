@@ -58,6 +58,7 @@ const scrpr = function(opts){
 		opt.method = opt.method || "get";
 		opt.data = opt.data || null;
 		opt.needle = opt.needle || {};
+		opt.xlsx = opt.xlsx || {};
 		opt.pdf = opt.pdf || {};
 		opt.successCodes = opt.successCodes || [ 200 ];
 		opt.parse = opt.parse || false;
@@ -150,7 +151,7 @@ const scrpr = function(opts){
 								// export sheets
 								try {
 									var result = table.SheetNames.reduce(function(records, sheetname){
-										return records[sheetname] = xlsx.utils.sheet_to_json(table.Sheets[sheetname], { header: 1, dateNF: 'yyyy"-"mm"-"dd' }), records;
+										return records[sheetname] = xlsx.utils.sheet_to_json(table.Sheets[sheetname], { header: 1, dateNF: 'yyyy"-"mm"-"dd', defval: null, ...opt.xlsx }), records;
 									},{});
 								} catch (err) {
 									return next(new Error("XLSX export error: "+err));
