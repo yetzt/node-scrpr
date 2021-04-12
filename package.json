@@ -8,7 +8,7 @@
   "license": "UNLICENSE",
   "dependencies": {
     "needle": "^2.6.0",
-    "quu": "^0.3.0"
+    "quu": "^0.4.0"
   },
   "optionalDependencies": {
     "cheerio": "^1.0.0-rc.5",
