@@ -131,7 +131,7 @@ const scrpr = function(opts){
 								if (xsv === null) return next(new Error("xsv not available"));
 						
 								var result = [];
-								xsv(self.xsv_opts[opt.parse] ).on("data", function(record){
+								xsv({ ...self.xsv_opts[opt.parse] }).on("data", function(record){
 									result.push(record);
 								}).on("end", function(){
 									return next(null, result);
