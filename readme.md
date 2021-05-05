@@ -48,6 +48,7 @@ Opts:
 * `pdf` — options passed on to `pdf.js-extract`, default `{}`
 * `preprocess(data, callback(err, data))` — modify data before parsing
 * `postprocess(data, callback(err, data))` — modify data after parsing
+* `stream` — deliver data as `ReadableStream` — no parsing or processing, default: `false`
 
 Callback:
 * `err` — contains Error or `null`

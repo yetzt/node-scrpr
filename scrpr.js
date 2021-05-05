@@ -54,6 +54,7 @@ const scrpr = function(opts){
 		},{ fn: function(){} });
 		if (!!url && !opt.url) opt.url = url;
 		
+		opt.stream = !!(opt.stream || false);
 		opt.cache = !!(opt.cache || true);
 		opt.method = opt.method || "get";
 		opt.data = opt.data || null;
@@ -98,6 +99,30 @@ const scrpr = function(opts){
 				}
 			};
 			
+			// raw data as stream
+			if (opt.stream === true || opt.parser === "stream") return needle.request(opt.method, opt.url, opt.data, req_opts).on("error", function(err){
+				return fn(err, false, "error");
+			}).on("response", function(resp){
+
+				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
+				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
+
+				const stream = this;
+				stream.pause();
+
+				// assemble and write cache
+				fs.writeFile(cachefile, JSON.stringify({
+					last: Date.now(),
+					modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
+					etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
+				},null,"\t"), function(err){
+					if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
+					stream.resume();
+					return fn(null, true, stream);
+				});
+
+			});
+
 			needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
 				if (err) return fn(err, false, "error");
 				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
