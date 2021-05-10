@@ -104,8 +104,8 @@ const scrpr = function(opts){
 				return fn(err, false, "error");
 			}).on("response", function(resp){
 
-				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
-				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
+				if (resp.statusCode === 304) return this.destroy(), fn(null, false, "cache-hit");
+				if (opt.successCodes.indexOf(resp.statusCode) <0) return this.destroy(), fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 
 				const stream = this;
 				stream.pause();
