@@ -104,6 +104,9 @@ const scrpr = function(opts){
 				return fn(err, false, "error");
 			}).on("response", function(resp){
 
+				// ignore response if needle follows a redirect
+				if ((!!req_opts.follow||!!req_opts.follow_max) && [301,302,303,307].includes(resp.statusCode)) return;
+
 				if (resp.statusCode === 304) return this.destroy(), fn(null, false, "cache-hit");
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return this.destroy(), fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 
