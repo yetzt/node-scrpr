@@ -13,7 +13,7 @@
   "optionalDependencies": {
     "cheerio": "^1.0.0-rc.5",
     "pdf.js-extract": "^0.1.5",
-    "xlsx": "^0.16.9",
+    "xlsx": "^0.17.0",
     "xml2js": "^0.4.23",
     "xsv": "^0.0.4",
     "yaml": "^1.10.0"
