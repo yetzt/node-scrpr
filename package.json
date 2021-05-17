@@ -1,6 +1,6 @@
 {
   "name": "scrpr",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "a scraper multitool",
   "main": "scrpr.js",
   "scripts": {},
@@ -11,14 +11,14 @@
     "quu": "^0.4.0"
   },
   "optionalDependencies": {
-    "cheerio": "^1.0.0-rc.5",
+    "cheerio": "^1.0.0",
     "dataunwrapper": "^0.0.2",
     "iconv-lite": "^0.4.24",
     "pdf.js-extract": "^0.1.5",
     "xlsx": "^0.17.0",
     "xml2js": "^0.4.23",
     "xsv": "^0.0.4",
-    "yaml": "^1.10.0"
+    "yaml": "^1.10.2"
   },
   "keywords": [
     "scraper",
