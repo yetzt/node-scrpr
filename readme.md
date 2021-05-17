@@ -67,6 +67,7 @@ Callback:
 * `yaml` — YAML Ain't Markup Language; `data` is an Object, parsed with [yaml](https://npmjs.com/package/yaml)
 * `xlsx` — Office Open XML Workbook; `data` is an Object, parsed with [xlsx](https://npmjs.com/package/xlsx); `{ "<sheetname>": [ [ cell, cell, cell, ... ], ... ] }`
 * `pdf` — Portable Document Format; `data` is an Object, parsed with [pdf.js-extract](https://npmjs.com/package/pdf.js-extract);
+* `dw` — Datawrapper Visualisation; `data` is an Object, extracted with [dataunwrapper](https://npmjs.com/package/dataunwrapper);
 
 ## Optional dependencies
 

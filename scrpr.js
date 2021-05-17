@@ -16,6 +16,7 @@ const yaml = (function(){ try { return require("yaml"); } catch (e) { return nul
 const xsv = (function(){ try { return require("xsv"); } catch (e) { return null; }})();
 const xml = (function(){ try { return require("xml2js").parseString; } catch (e) { return null; }})();
 const pdf = (function(){ try { return require("pdf.js-extract").PDFExtract; } catch (e) { return null; }})();
+const dw = (function(){ try { return require("dataunwrapper"); } catch (e) { return null; }})();
 
 const scrpr = function(opts){
 	if (!(this instanceof scrpr)) return new scrpr(opts);
@@ -215,6 +216,32 @@ const scrpr = function(opts){
 								data.isCheerio = true;
 
 								return next(null, data);
+
+							break;
+							case "dw":
+								if (dw === null) return next(new Error("dataunwrapper not available"));
+						
+								// use dataunwrapper
+								dw.extract(data, function(err, data){
+									if (err) return next(err);
+
+									// could be json, let's try
+									try {
+										data = JSON.parse(data);
+										return next(null, data);
+									} catch (err) {
+										
+										// probably csv
+										var result = [];
+										xsv({ ...self.xsv_opts["csv"] }).on("data", function(record){
+											result.push(record);
+										}).on("end", function(){
+											return next(null, result);
+										}).end(data);
+										
+									}
+
+								});
 
 							break;
 							case "xml":
