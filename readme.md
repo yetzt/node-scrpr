@@ -71,7 +71,7 @@ Callback:
 
 ## Optional dependencies
 
-`xsv`, `xlsx`, `xml2js`, `yaml` and `pdf.js-extract` are optional dependencies. They should be installed if their parsing is required.
+`xsv`, `xlsx`, `xml2js`, `yaml`, `cheerio`, `dataunwrapper` and `pdf.js-extract` are optional dependencies. They should only be installed if their parsing is required.
 
 
 ## License
