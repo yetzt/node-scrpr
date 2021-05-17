@@ -55,7 +55,7 @@ const scrpr = function(opts){
 		if (!!url && !opt.url) opt.url = url;
 		
 		opt.stream = !!(opt.stream || false);
-		opt.cache = !!(opt.cache || true);
+		opt.cache = (opt.hasOwnProperty("cache") ? !!opt.cache : true);
 		opt.method = opt.method || "get";
 		opt.data = opt.data || null;
 		opt.needle = opt.needle || {};
