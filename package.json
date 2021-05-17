@@ -1,6 +1,6 @@
 {
   "name": "scrpr",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "a scraper multitool",
   "main": "scrpr.js",
   "scripts": {},
