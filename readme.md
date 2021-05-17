@@ -49,6 +49,7 @@ Opts:
 * `preprocess(data, callback(err, data))` — modify data before parsing
 * `postprocess(data, callback(err, data))` — modify data after parsing
 * `stream` — deliver data as `ReadableStream` — no parsing or processing, default: `false`
+* `metaredirects` — follow `<meta http-equiv="refresh">` style redirects, default: `false`
 
 Callback:
 * `err` — contains Error or `null`

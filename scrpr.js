@@ -66,6 +66,7 @@ const scrpr = function(opts){
 		opt.process = opt.process || opt.postprocess || null;
 		opt.preprocess = opt.preprocess || null;
 		opt.cacheid = opt.cacheid || self.hash(opt);
+		opt.metaredirects = (opt.hasOwnProperty("metaredirects")) ? !!opt.metaredirects : ((opt.parse === "dw") || false);
 				
 		const cachefile = path.resolve(self.cachedir, opt.cacheid+".json");
 
@@ -126,7 +127,7 @@ const scrpr = function(opts){
 
 			});
 
-			needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
+			self.request(opt, req_opts, function(err, resp, data){
 				if (err) return fn(err, false, "error");
 				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
@@ -282,6 +283,24 @@ const scrpr = function(opts){
 		return self;
 		
 	};
+};
+
+// request, but with 
+scrpr.prototype.request = function(opt, req_opts, fn){
+	const self = this;
+	needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
+		if (!opt.metaredirects || err || resp.statusCode !== 200 || resp.headers["content-type"] !== "text/html") return fn.apply(this, arguments);
+		
+		if (!/(<meta[^>]+http-equiv="refresh"[^>]*>)/i.test(data)) return fn.apply(this, arguments);;
+		if (!/content="([0-9]+;\s*)?url=([^"]+)"/i.test(RegExp.$1)) return fn.apply(this, arguments);;
+
+		const redirect = url.resolve(opt.url, RegExp.$2);
+		const redirected = (opt.redirected||0)+1;
+
+		if (redirect === opt.url || redirected > 5) return fn.apply(this, arguments); // prevent redir loop
+
+		return self.request({ ...opt, redirected: redirected, url: redirect }, req_opts, fn);
+	});
 };
 
 scrpr.prototype.hash = function(v){
