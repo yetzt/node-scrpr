@@ -11,7 +11,7 @@
     "quu": "^0.4.0"
   },
   "optionalDependencies": {
-    "cheerio": "^1.0.0",
+    "cheerio": "^1.0.0-rc",
     "dataunwrapper": "^0.0.2",
     "iconv-lite": "^0.4.24",
     "pdf.js-extract": "^0.1.5",
