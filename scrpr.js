@@ -11,6 +11,7 @@ const needle = require("needle");
 
 // optional deps (wish there was a nicer pattern)
 const cheerio = (function(){ try { return require("cheerio"); } catch (e) { return null; }})();
+const iconv = (function(){ try { return require("iconv-lite"); } catch (e) { return null; }})();
 const xlsx = (function(){ try { return require("xlsx"); } catch (e) { return null; }})();
 const yaml = (function(){ try { return require("yaml"); } catch (e) { return null; }})();
 const xsv = (function(){ try { return require("xsv"); } catch (e) { return null; }})();
@@ -69,6 +70,7 @@ const scrpr = function(opts){
 		opt.preprocess = opt.preprocess || null;
 		opt.cacheid = opt.cacheid || self.hash(opt);
 		opt.metaredirects = (opt.hasOwnProperty("metaredirects")) ? !!opt.metaredirects : ((opt.parse === "dw") || false);
+		opt.iconv = opt.iconv || null;
 				
 		const cachefile = path.resolve(self.cachedir, opt.cacheid+".json");
 
@@ -113,7 +115,7 @@ const scrpr = function(opts){
 				if (resp.statusCode === 304) return this.destroy(), fn(null, false, "cache-hit");
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return this.destroy(), fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 
-				const stream = this;
+				const stream = (opt.iconv && iconv) ? this.pipe(iconv.decodeStream(opt.iconv)) : this;
 				stream.pause();
 
 				// assemble and write cache
@@ -133,6 +135,9 @@ const scrpr = function(opts){
 				if (err) return fn(err, false, "error");
 				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
+				
+				// decode
+				if (opt.iconv && iconv) data = iconv.decode(data, opt.iconv);
 				
 				// preprocess
 				(function(next){

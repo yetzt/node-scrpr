@@ -50,6 +50,7 @@ Opts:
 * `postprocess(data, callback(err, data))` — modify data after parsing
 * `stream` — deliver data as `ReadableStream` — no parsing or processing, default: `false`
 * `metaredirects` — follow `<meta http-equiv="refresh">` style redirects, default: `false`
+* `iconv` — decode stream or data as this charset with iconv-lite before parsing, default: `false`
 
 Callback:
 * `err` — contains Error or `null`
@@ -71,7 +72,7 @@ Callback:
 
 ## Optional dependencies
 
-`xsv`, `xlsx`, `xml2js`, `yaml`, `cheerio`, `dataunwrapper` and `pdf.js-extract` are optional dependencies. They should only be installed if their parsing is required.
+`xsv`, `xlsx`, `xml2js`, `yaml`, `cheerio`, `dataunwrapper`, `iconv-lite` and `pdf.js-extract` are optional dependencies. They should only be installed if their use is required.
 
 
 ## License
