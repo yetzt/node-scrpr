@@ -13,7 +13,7 @@
   "optionalDependencies": {
     "cheerio": "^1.0.0",
     "dataunwrapper": "^0.0.4",
-    "iconv-lite": "^0.4.24",
+    "iconv-lite": "^0.6.0",
     "pdf.js-extract": "^0.1.5",
     "xlsx": "^0.17.0",
     "xml2js": "^0.4.23",
