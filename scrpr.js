@@ -32,7 +32,7 @@ const scrpr = function(opts){
 	};
 
 	self.needle_opts = {
-		user_agent: "Mozilla/5.0 (compatible; "+pkg.name+"/"+pkg.version+"; +https://npmjs.com/package/"+pkg.name+")"
+		user_agent: "Mozilla/5.0 (compatible; "+pkg.name+"/"+pkg.version+"; +https://npmjs.com/package/"+pkg.name+")",
 	};
 	
 	self.concurrency = Math.max((parseInt(opts.concurrency,10)||1),1);
