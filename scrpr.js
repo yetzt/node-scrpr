@@ -318,7 +318,7 @@ const scrpr = function(opts){
 	};
 };
 
-// request, but with 
+// request, but with following html meta redirects
 scrpr.prototype.request = function(opt, req_opts, fn){
 	const self = this;
 	needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
@@ -336,6 +336,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 	});
 };
 
+// hash helper
 scrpr.prototype.hash = function(v){
 	return crypto.createHash("sha256").update(this.stringify(v)).digest("hex");
 };
