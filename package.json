@@ -7,13 +7,13 @@
   "author": "yetzt <node@yetzt.me>",
   "license": "UNLICENSE",
   "dependencies": {
-    "needle": "^2.6.0",
+    "needle": "^3.0.0",
     "quu": "^0.4.0"
   },
   "optionalDependencies": {
     "cheerio": "^1.0.0",
-    "dataunwrapper": "^0.0.4",
-    "iconv-lite": "^0.4.24",
+    "dataunwrapper": "^0.0.5",
+    "iconv-lite": "^0.6.3",
     "pdf.js-extract": "^0.1.5",
     "xlsx": "^0.17.0",
     "xml2js": "^0.4.23",
