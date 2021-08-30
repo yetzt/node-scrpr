@@ -11,6 +11,7 @@ const needle = require("needle");
 
 // optional deps (wish there was a nicer pattern)
 const cheerio = (function(){ try { return require("cheerio"); } catch (e) { return null; }})();
+const geturi = (function(){ try { return require("get-uri"); } catch (e) { return null; }})();
 const iconv = (function(){ try { return require("iconv-lite"); } catch (e) { return null; }})();
 const xlsx = (function(){ try { return require("xlsx"); } catch (e) { return null; }})();
 const yaml = (function(){ try { return require("yaml"); } catch (e) { return null; }})();
@@ -47,7 +48,7 @@ const scrpr = function(opts){
 	return function(){
 
 		// destructure arguments
-		const { url, opt, fn } = Array.from(arguments).reduce(function(a,v){
+		const { u, opt, fn } = Array.from(arguments).reduce(function(a,v){
 			switch (typeof v) {
 				case "string": a.url = v; break;
 				case "object": a.opt = v; break;
@@ -55,7 +56,7 @@ const scrpr = function(opts){
 			}
 			return a;
 		},{ fn: function(){} });
-		if (!!url && !opt.url) opt.url = url;
+		if (!!u && !opt.url) opt.url = u;
 		
 		opt.stream = !!(opt.stream || false);
 		opt.cache = (opt.hasOwnProperty("cache") ? !!opt.cache : true);
@@ -105,31 +106,72 @@ const scrpr = function(opts){
 			};
 			
 			// raw data as stream
-			if (opt.stream === true || opt.parser === "stream") return needle.request(opt.method, opt.url, opt.data, req_opts).on("error", function(err){
-				return fn(err, false, "error");
-			}).on("response", function(resp){
+			if (opt.stream === true || opt.parser === "stream") return (function(){
 
-				// ignore response if needle follows a redirect
-				if ((!!req_opts.follow||!!req_opts.follow_max) && [301,302,303,307].includes(resp.statusCode)) return;
 
-				if (resp.statusCode === 304) return this.destroy(), fn(null, false, "cache-hit");
-				if (opt.successCodes.indexOf(resp.statusCode) <0) return this.destroy(), fn(new Error("Got Status Code "+resp.statusCode), false, "error");
+				switch (url.parse(opt.url).protocol) {
+					case "http:":
+					case "https:":
+						
+						needle.request(opt.method, opt.url, opt.data, req_opts).on("error", function(err){
+							return fn(err, false, "error");
+						}).on("response", function(resp){
 
-				const stream = (opt.iconv && iconv) ? this.pipe(iconv.decodeStream(opt.iconv)) : this;
-				stream.pause();
+							// ignore response if needle follows a redirect
+							if ((!!req_opts.follow||!!req_opts.follow_max) && [301,302,303,307].includes(resp.statusCode)) return;
 
-				// assemble and write cache
-				fs.writeFile(cachefile, JSON.stringify({
-					last: Date.now(),
-					modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
-					etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
-				},null,"\t"), function(err){
-					if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
-					stream.resume();
-					return fn(null, true, stream);
-				});
+							if (resp.statusCode === 304) return this.destroy(), fn(null, false, "cache-hit");
+							if (opt.successCodes.indexOf(resp.statusCode) <0) return this.destroy(), fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 
-			});
+							const stream = (opt.iconv && iconv) ? this.pipe(iconv.decodeStream(opt.iconv)) : this;
+							stream.pause();
+
+							// assemble and write cache
+							fs.writeFile(cachefile, JSON.stringify({
+								last: Date.now(),
+								modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
+								etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
+							},null,"\t"), function(err){
+								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
+								stream.resume();
+								return fn(null, true, stream);
+							});
+
+						});
+
+					break;
+					case "ftp:":
+
+						// check if module is available
+						if (geturi === null) return fn(new Error("get-uri not available"), false, "error");
+						
+						// get ftp resource as stream
+						geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }, function(err, rs) {
+							if (err && err.code === 'ENOTMODIFIED') return fn(null, false, "cache-hit");
+							if (err) return fn(err, {}, null);
+
+							const stream = (opt.iconv && iconv) ? rs.pipe(iconv.decodeStream(opt.iconv)) : rs;
+							stream.pause();
+				
+							// assemble and write cache
+							fs.writeFile(cachefile, JSON.stringify({
+								last: Date.now(),
+								modified: (rs.hasOwnProperty("lastModified") ? rs.lastModified : false),
+							},null,"\t"), function(err){
+								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
+								stream.resume();
+								return fn(null, true, stream);
+							});
+				
+						});
+						
+					break;
+					default:
+						fn(new Error("Unknown Protocol"), false, "error");
+					break;
+				};
+				
+			})();
 
 			self.request(opt, req_opts, function(err, resp, data){
 				if (err) return fn(err, false, "error");
@@ -321,19 +363,58 @@ const scrpr = function(opts){
 // request, but with following html meta redirects
 scrpr.prototype.request = function(opt, req_opts, fn){
 	const self = this;
-	needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
-		if (!opt.metaredirects || err || resp.statusCode !== 200 || resp.headers["content-type"] !== "text/html") return fn.apply(this, arguments);
+	
+	switch (url.parse(opt.url).protocol) {
+		case "http:":
+		case "https:":
+
+			needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
+				if (!opt.metaredirects || err || resp.statusCode !== 200 || resp.headers["content-type"] !== "text/html") return fn.apply(this, arguments);
 		
-		if (!/(<meta[^>]+http-equiv="refresh"[^>]*>)/i.test(data)) return fn.apply(this, arguments);;
-		if (!/content="([0-9]+;\s*)?url=([^"]+)"/i.test(RegExp.$1)) return fn.apply(this, arguments);;
+				if (!/(<meta[^>]+http-equiv="refresh"[^>]*>)/i.test(data)) return fn.apply(this, arguments);;
+				if (!/content="([0-9]+;\s*)?url=([^"]+)"/i.test(RegExp.$1)) return fn.apply(this, arguments);;
 
-		const redirect = url.resolve(opt.url, RegExp.$2);
-		const redirected = (opt.redirected||0)+1;
+				const redirect = url.resolve(opt.url, RegExp.$2);
+				const redirected = (opt.redirected||0)+1;
 
-		if (redirect === opt.url || redirected > 5) return fn.apply(this, arguments); // prevent redir loop
+				if (redirect === opt.url || redirected > 5) return fn.apply(this, arguments); // prevent redir loop
 
-		return self.request({ ...opt, redirected: redirected, url: redirect }, req_opts, fn);
-	});
+				return self.request({ ...opt, redirected: redirected, url: redirect }, req_opts, fn);
+			});
+			
+		break;
+		case "ftp:":
+			if (geturi === null) return fn(new Error("get-uri not available"));
+						
+			geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }, function(err, stream) {
+				if (err && err.code === 'ENOTMODIFIED') return fn(null, { statusCode: 304 }, null);
+				if (err) return fn(err, {}, null);
+				
+				// capture data
+				const data = [];
+				stream.on('data', function(chunk){
+					data.push(Buffer.from(chunk));
+				}).on('end', function(){
+
+					// simulate bare minimum needle callback
+					fn(null, { 
+						statusCode: 200,
+						headers: {
+							"content-type": "application/octet-stream",
+							"last-modified": stream.lastModified,
+						}
+					}, Buffer.concat(data));
+					
+				});
+				
+			});
+			
+		break;
+		default:
+			return fn(new Error("Unknown Protocol"));
+		break;
+	}
+	
 };
 
 // hash helper

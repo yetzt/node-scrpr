@@ -70,9 +70,13 @@ Callback:
 * `pdf` — Portable Document Format; `data` is an Object, parsed with [pdf.js-extract](https://npmjs.com/package/pdf.js-extract);
 * `dw` — Datawrapper Visualisation; `data` is an Object, extracted with [dataunwrapper](https://npmjs.com/package/dataunwrapper);
 
+## FTP
+
+Rudimentary handling for  `ftp` URLs is available if the optional `get-uri` dependency is installed.
+
 ## Optional dependencies
 
-`xsv`, `xlsx`, `xml2js`, `yaml`, `cheerio`, `dataunwrapper`, `iconv-lite` and `pdf.js-extract` are optional dependencies. They should only be installed if their use is required.
+`xsv`, `xlsx`, `xml2js`, `yaml`, `cheerio`, `dataunwrapper`, `iconv-lite`, `pdf.js-extract` and `get-uri` are optional dependencies. They should only be installed if their use is required.
 
 
 ## License
