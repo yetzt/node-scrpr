@@ -18,6 +18,7 @@ const yaml = (function(){ try { return require("yaml"); } catch (e) { return nul
 const xsv = (function(){ try { return require("xsv"); } catch (e) { return null; }})();
 const xml = (function(){ try { return require("xml2js").parseString; } catch (e) { return null; }})();
 const pdf = (function(){ try { return require("pdf.js-extract").PDFExtract; } catch (e) { return null; }})();
+const kdl = (function(){ try { return require("kdljs").parse; } catch (e) { return null; }})();
 const dw = (function(){ try { return require("dataunwrapper"); } catch (e) { return null; }})();
 
 const scrpr = function(opts){
@@ -298,6 +299,17 @@ const scrpr = function(opts){
 							case "pdf":
 								if (pdf === null) return next(new Error("pdf.js-extract not available"));
 								return (new pdf()).extractBuffer(data, opts.pdf, next);
+							break;
+							case "kdl":
+								if (kdl === null) return next(new Error("kdljs not available"));
+
+								try {
+									data = kdl(data);
+								} catch (err) {
+									return next(err);
+								}
+								
+								return next((data.errors instanceof Array && data.errors.length && data.errors) || null), data.output);
 							break;
 							case "json":
 
