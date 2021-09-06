@@ -309,7 +309,7 @@ const scrpr = function(opts){
 									return next(err);
 								}
 								
-								return next((data.errors instanceof Array && data.errors.length && data.errors) || null), data.output);
+								return next(((data.errors instanceof Array && data.errors.length && data.errors) || null), data.output);
 							break;
 							case "json":
 
