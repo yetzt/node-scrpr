@@ -109,7 +109,6 @@ const scrpr = function(opts){
 			// raw data as stream
 			if (opt.stream === true || opt.parser === "stream") return (function(){
 
-
 				switch (url.parse(opt.url).protocol) {
 					case "http:":
 					case "https:":
@@ -135,7 +134,7 @@ const scrpr = function(opts){
 							},null,"\t"), function(err){
 								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								stream.resume();
-								return fn(null, true, stream);
+								return fn(null, true, stream, resp);
 							});
 
 						});
