@@ -74,6 +74,7 @@ const scrpr = function(opts){
 		opt.cacheid = opt.cacheid || self.hash(opt);
 		opt.metaredirects = (opt.hasOwnProperty("metaredirects")) ? !!opt.metaredirects : ((opt.parse === "dw") || false);
 		opt.iconv = opt.iconv || null;
+		opt.cooldown = opt.cooldown || false;
 				
 		const cachefile = path.resolve(self.cachedir, opt.cacheid+".json");
 
@@ -92,6 +93,9 @@ const scrpr = function(opts){
 				});
 			});
 		})(function(cache){
+
+			// cooldown
+			if (opt.cooldown && cache && cache.hasOwnProperty("last") && cache.last+opt.cooldown > Date.now()) return console.error(cache.last, Date.now()-(cache.last+opt.cooldown)), fn(null, false, "cooldown");
 
 			const headers = { ...self.default_headers };
 			if (opt.cache && cache && cache.hasOwnProperty("etag") && !!cache.etag) headers["If-None-Match"] = cache.etag;
