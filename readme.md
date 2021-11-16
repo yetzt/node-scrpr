@@ -51,6 +51,7 @@ Opts:
 * `stream` — deliver data as `ReadableStream` — no parsing or processing, default: `false`
 * `metaredirects` — follow `<meta http-equiv="refresh">` style redirects, default: `false`
 * `iconv` — decode stream or data as this charset with iconv-lite before parsing, default: `false`
+* `cooldown` — microseconds since last fetch before a resource is fetched again, default: `false`
 
 Callback:
 * `err` — contains Error or `null`
@@ -73,7 +74,11 @@ Callback:
 
 ## FTP
 
-Rudimentary handling for  `ftp` URLs is available if the optional `get-uri` dependency is installed.
+Rudimentary handling for `ftp` URLs is available if the optional `get-uri` dependency is installed.
+
+## Local Files
+
+Rudimentary handling for local files is available with the `file:/` pseude-protocol.
 
 ## Optional dependencies
 
