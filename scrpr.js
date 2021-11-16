@@ -138,7 +138,7 @@ const scrpr = function(opts){
 								modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
 								etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
 							},null,"\t"), function(err){
-								if (err) debug("Unable to write cache file: %s – %s", cachefile, err);
+								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								stream.resume();
 								return fn(null, true, stream, resp);
 							});
@@ -164,7 +164,7 @@ const scrpr = function(opts){
 								last: Date.now(),
 								modified: (rs.hasOwnProperty("lastModified") ? rs.lastModified : false),
 							},null,"\t"), function(err){
-								if (err) debug("Unable to write cache file: %s – %s", cachefile, err);
+								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								stream.resume();
 								return fn(null, true, stream);
 							});
@@ -189,7 +189,7 @@ const scrpr = function(opts){
 								last: Date.now(),
 								etag: etag,
 							},null,"\t"), function(err){
-								if (err) debug("Unable to write cache file: %s – %s", cachefile, err);
+								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								return fn(null, true, fs.createReadStream(file));
 							});
 				
@@ -386,7 +386,7 @@ const scrpr = function(opts){
 								modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
 								etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
 							},null,"\t"), function(err){
-								if (err) debug("Unable to write cache file: %s – %s", cachefile, err);
+								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								return fn(null, true, data);
 							});
 						
