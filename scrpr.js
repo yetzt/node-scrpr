@@ -168,6 +168,29 @@ const scrpr = function(opts){
 						});
 						
 					break;
+					case "file:":
+						const file = url.parse(opt.url.replace(/^file:\/+/g,'file:/')).pathname
+
+						fs.stat(file, function(err, stat){
+							if (err) return fn(err, false, "error");
+				
+							// generate fake etag from stat
+							const etag = [stat.size, stat.ino, stat.mtime.valueOf()].map(function(v){ return v.toString(36); }).join("-");
+				
+							// check etag against cache
+							if (etag === req_opts.headers["If-None-Match"]) return fn(null, false, "cache-hit");
+
+							// assemble and write cache
+							fs.writeFile(cachefile, JSON.stringify({
+								last: Date.now(),
+								etag: etag,
+							},null,"\t"), function(err){
+								if (err) debug("Unable to write cache file: %s – %s", cachefile, err);
+								return fn(null, true, fs.createReadStream(file));
+							});
+				
+						});
+					break;
 					default:
 						fn(new Error("Unknown Protocol"), false, "error");
 					break;
@@ -423,6 +446,34 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 				
 			});
 			
+		break;
+		case "file:":
+			const file = url.parse(opt.url.replace(/^file:\/+/g,'file:/')).pathname
+
+			fs.stat(file, function(err, stat){
+				if (err) return fn(err, { statusCode: 500 }, null);
+				
+				// generate fake etag from stat
+				const etag = [stat.size, stat.ino, stat.mtime.valueOf()].map(function(v){ return v.toString(36); }).join("-");
+				
+				// check etag against cache
+				if (etag === req_opts.headers["If-None-Match"]) return fn(null, { statusCode: 304 }, null);
+				
+				fs.readFile(file, function(err, contents){
+					if (err) return fn(err, { statusCode: 500 }, null);
+					
+					// simulate bare minimum needle callback
+					fn(null, { 
+						statusCode: 200,
+						headers: {
+							"content-type": (mime.lookup(path.extname(file))||"application/octet-stream"),
+							"etag": etag,
+						}
+					}, contents);
+
+				});
+				
+			});
 		break;
 		default:
 			return fn(new Error("Unknown Protocol"));
