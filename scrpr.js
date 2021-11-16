@@ -8,6 +8,7 @@ const pkg = require("./package.json");
 
 const quu = require("quu");
 const needle = require("needle");
+const mime = require("mime-types");
 
 // optional deps (wish there was a nicer pattern)
 const cheerio = (function(){ try { return require("cheerio"); } catch (e) { return null; }})();
@@ -413,7 +414,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 					fn(null, { 
 						statusCode: 200,
 						headers: {
-							"content-type": "application/octet-stream",
+							"content-type": (mime.lookup(path.extname(url.parse(opt.url).pathname))||"application/octet-stream"),
 							"last-modified": stream.lastModified,
 						}
 					}, Buffer.concat(data));
