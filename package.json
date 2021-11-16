@@ -13,7 +13,7 @@
   "optionalDependencies": {
     "cheerio": "^1.0.0-rc.10",
     "dataunwrapper": "^0.0.5",
-    "get-uri": "^3.0.2",
+    "get-uri": "^4.0.0",
     "iconv-lite": "^0.6.3",
     "kdljs": "^0.1.1",
     "pdf.js-extract": "^0.1.5",
