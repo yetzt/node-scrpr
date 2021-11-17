@@ -95,7 +95,7 @@ const scrpr = function(opts){
 		})(function(cache){
 
 			// cooldown
-			if (opt.cooldown && cache && cache.hasOwnProperty("last") && cache.last+opt.cooldown > Date.now()) return console.error(cache.last, Date.now()-(cache.last+opt.cooldown)), fn(null, false, "cooldown");
+			if (opt.cooldown && cache && cache.hasOwnProperty("last") && cache.last+opt.cooldown > Date.now()) return fn(null, false, "cooldown");
 
 			const headers = { ...self.default_headers };
 			if (opt.cache && cache && cache.hasOwnProperty("etag") && !!cache.etag) headers["If-None-Match"] = cache.etag;
