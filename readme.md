@@ -45,6 +45,8 @@ Opts:
 * `parse` — format to parse, default: `null` (raw data)
 * `successCodes` — array of http status codes considered successful, default: `[ 200 ]`
 * `needle` — options passed on to `needle`, default `{}`
+* `xlsx` — options passed on to `xlsx`, default `{}`
+* `xsv` — options passed on to `xsv`, default `{}`
 * `pdf` — options passed on to `pdf.js-extract`, default `{}`
 * `preprocess(data, callback(err, data))` — modify data before parsing
 * `postprocess(data, callback(err, data))` — modify data after parsing
