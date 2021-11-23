@@ -206,7 +206,7 @@ const scrpr = function(opts){
 			self.request(opt, req_opts, function(err, resp, data){
 				if (err) return fn(err, false, "error");
 				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
-				if (req_opts.headers["If-None-Match"] && resp.headers.etag && resp.headers.etag === req_opts.headers["If-None-Match"]) return this.destroy(), fn(null, false, "cache-hit"); // client-side if-none-match, because some servers don't bother
+				if (req_opts.headers["If-None-Match"] && resp.headers.etag && resp.headers.etag === req_opts.headers["If-None-Match"]) return fn(null, false, "cache-hit"); // client-side if-none-match, because some servers don't bother
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 				
 				// decode
