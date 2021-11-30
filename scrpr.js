@@ -471,6 +471,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 					fn(null, { 
 						statusCode: 200,
 						headers: {
+							"last-modified": stat.mtime,
 							"content-type": (mime.lookup(path.extname(file))||"application/octet-stream"),
 							"etag": etag,
 						}
