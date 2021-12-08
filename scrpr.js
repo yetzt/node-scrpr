@@ -167,7 +167,7 @@ const scrpr = function(opts){
 							},null,"\t"), function(err){
 								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								stream.resume();
-								return fn(null, true, stream);
+								return fn(null, true, stream, { statusCode: 200, headers: { "last-modified": rs.lastModified } });
 							});
 				
 						});
@@ -185,13 +185,19 @@ const scrpr = function(opts){
 							// check etag against cache
 							if (etag === req_opts.headers["If-None-Match"]) return fn(null, false, "cache-hit");
 
+							let stream = fs.createReadStream(file);
+							stream.pause();
+
+							stream = (opt.iconv && iconv) ? stream.pipe(iconv.decodeStream(opt.iconv)) : stream;
+
 							// assemble and write cache
 							fs.writeFile(cachefile, JSON.stringify({
 								last: Date.now(),
 								etag: etag,
 							},null,"\t"), function(err){
 								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
-								return fn(null, true, fs.createReadStream(file));
+								stream.resume();
+								return fn(null, true, stream, { statusCode: 200, headers: { "content-length": stat.size, "last-modified": stat.mtime, "etag": etag } });
 							});
 				
 						});
