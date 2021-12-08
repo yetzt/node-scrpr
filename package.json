@@ -13,7 +13,7 @@
   },
   "optionalDependencies": {
     "cheerio": "^1.0.0-rc.10",
-    "dataunwrapper": "^0.0.5",
+    "dataunwrapper": "^0.0.6",
     "get-uri": "^4.0.0",
     "iconv-lite": "^0.6.3",
     "kdljs": "^0.1.1",
