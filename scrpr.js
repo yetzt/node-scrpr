@@ -501,7 +501,7 @@ scrpr.prototype.hash = function(v){
 
 // extended object serializer
 scrpr.prototype.stringify = function(v){
-	return JSON.stringify(v, function(k,v){
+	return (v instanceof Buffer) ? v : JSON.stringify(v, function(k,v){
 		if (v&&!!v.isCheerio) return v.html();
 		if (typeof v === "function") return v.toString();
 		if (v instanceof Date) return v.toISOString();
