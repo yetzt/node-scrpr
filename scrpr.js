@@ -73,6 +73,7 @@ const scrpr = function(opts){
 		opt.process = opt.process || opt.postprocess || null;
 		opt.preprocess = opt.preprocess || null;
 		opt.cacheid = opt.cacheid || self.hash(opt);
+		opt.sizechange = !!opt.sizechange;
 		opt.metaredirects = (opt.hasOwnProperty("metaredirects")) ? !!opt.metaredirects : ((opt.parse === "dw") || false);
 		opt.iconv = opt.iconv || null;
 		opt.cooldown = opt.cooldown || false;
@@ -128,6 +129,8 @@ const scrpr = function(opts){
 
 							if (resp.statusCode === 304) return this.destroy(), fn(null, false, "cache-hit");
 							if (req_opts.headers["If-None-Match"] && resp.headers.etag && resp.headers.etag === req_opts.headers["If-None-Match"]) return this.destroy(), fn(null, false, "cache-hit"); // client-side if-none-match, because some servers don't bother
+							if (cache && opt.sizechange && resp.headers.hasOwnProperty("content-length") && cache.hasOwnProperty("size") && cache.size === parseInt(resp.headers["content-length"],10)) return this.destroy(), fn(null, false, "cache-hit"); // assume no change if same size because CDNs are weird
+
 							if (opt.successCodes.indexOf(resp.statusCode) <0) return this.destroy(), fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 
 							const stream = (opt.iconv && iconv) ? this.pipe(iconv.decodeStream(opt.iconv)) : this;
@@ -138,6 +141,7 @@ const scrpr = function(opts){
 								last: Date.now(),
 								modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
 								etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
+								size: (resp.headers.hasOwnProperty("content-length") ? (parseInt(resp.headers["content-length"],10) || false) : false),
 							},null,"\t"), function(err){
 								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								stream.resume();
@@ -194,6 +198,7 @@ const scrpr = function(opts){
 							fs.writeFile(cachefile, JSON.stringify({
 								last: Date.now(),
 								etag: etag,
+								size: stat.size,
 							},null,"\t"), function(err){
 								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								stream.resume();
@@ -213,6 +218,7 @@ const scrpr = function(opts){
 				if (err) return fn(err, false, "error");
 				if (resp.statusCode === 304) return fn(null, false, "cache-hit");
 				if (req_opts.headers["If-None-Match"] && resp.headers.etag && resp.headers.etag === req_opts.headers["If-None-Match"]) return fn(null, false, "cache-hit"); // client-side if-none-match, because some servers don't bother
+				if (cache && opt.sizechange && resp.headers.hasOwnProperty("content-length") && cache.hasOwnProperty("size") && cache.size === parseInt(resp.headers["content-length"],10)) return this.destroy(), fn(null, false, "cache-hit"); // assume no change if same size because CDNs are weird
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
 				
 				// decode
@@ -392,6 +398,7 @@ const scrpr = function(opts){
 								hashp: data_hash_processed,
 								modified: (resp.headers.hasOwnProperty("last-modified") ? resp.headers["last-modified"] : false),
 								etag: (resp.headers.hasOwnProperty("etag") ? resp.headers["etag"] : false),
+								size: (resp.headers.hasOwnProperty("content-length") ? (parseInt(resp.headers["content-length"],10) || false) : false),
 							},null,"\t"), function(err){
 								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								return fn(null, true, data);
@@ -479,6 +486,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 						headers: {
 							"last-modified": stat.mtime,
 							"content-type": (mime.lookup(path.extname(file))||"application/octet-stream"),
+							"content-length": stat.size,
 							"etag": etag,
 						}
 					}, contents);

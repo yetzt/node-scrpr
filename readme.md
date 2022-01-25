@@ -54,6 +54,7 @@ Opts:
 * `metaredirects` — follow `<meta http-equiv="refresh">` style redirects, default: `false`
 * `iconv` — decode stream or data as this charset with iconv-lite before parsing, default: `false`
 * `cooldown` — microseconds since last fetch before a resource is fetched again, default: `false`
+* `sizechange` — treat unchanged content-length as same file, default: `false`
 
 Callback:
 * `err` — contains Error or `null`
