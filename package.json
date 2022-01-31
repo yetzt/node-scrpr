@@ -1,6 +1,6 @@
 {
   "name": "scrpr",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "a scraper multitool",
   "main": "scrpr.js",
   "scripts": {},
@@ -20,7 +20,7 @@
     "pdf.js-extract": "^0.1.5",
     "xlsx": "^0.17.5",
     "xml2js": "^0.4.23",
-    "xsv": "^0.0.4",
+    "xsv": "^0.0.5",
     "yaml": "^1.10.2"
   },
   "keywords": [
