@@ -26,6 +26,9 @@ const scrpr = function(opts){
 	if (!(this instanceof scrpr)) return new scrpr(opts);
 	const self = this;
 
+	// optionalize opts
+	opts = opts||{};
+
 	const q = quu(1);
 
 	self.xsv_opts = {
