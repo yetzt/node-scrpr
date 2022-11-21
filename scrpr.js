@@ -375,7 +375,7 @@ const scrpr = function(opts){
 						if (err) return fn(err, false, "error");
 
 						// convert xml and json formats to strings (needle only converts text/* mime types)
-						if (data instanceof Buffer && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
+						if (data instanceof Buffer && resp.headers.hasOwnProperty("content-type") && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
 
 						// check for processing function
 						(function(next){
