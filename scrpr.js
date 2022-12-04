@@ -439,8 +439,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 
 				return self.request({ ...opt, redirected: redirected, url: redirect }, req_opts, fn);
 			}).once("error", function(err){
-				fn = function(){};
-				return fn(err);
+				return fn(err), fn = function(){};
 			});
 		break;
 		case "ftp:":
