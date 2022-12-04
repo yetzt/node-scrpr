@@ -438,8 +438,10 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 				if (redirect === opt.url || redirected > 5) return fn.apply(this, arguments); // prevent redir loop
 
 				return self.request({ ...opt, redirected: redirected, url: redirect }, req_opts, fn);
+			}).once("error", function(err){
+				fn = function(){};
+				return fn(err);
 			});
-			
 		break;
 		case "ftp:":
 			if (geturi === null) return fn(new Error("get-uri not available"), { statusCode: 500 }, null);
