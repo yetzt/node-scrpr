@@ -10,6 +10,12 @@ const quu = require("quu");
 const needle = require("needle");
 const mime = require("mime-types");
 
+// agents
+const agents = {
+	http: require("http").Agent({ keepAlive: true }),
+	https: require("https").Agent({ keepAlive: true }),
+};
+
 // optional deps (wish there was a nicer pattern)
 const cheerio = (function(){ try { return require("cheerio"); } catch (e) { return null; }})();
 const geturi = (function(){ try { return require("get-uri"); } catch (e) { return null; }})();
@@ -124,6 +130,9 @@ const scrpr = function(opts){
 				switch (protocol) {
 					case "http":
 					case "https":
+
+						req_opts.agent = agents[protocol];
+
 						needle.request(opt.method, opt.url, opt.data, req_opts).on("error", function(err){
 							return fn(err, false, "error");
 						}).on("response", function(resp){
