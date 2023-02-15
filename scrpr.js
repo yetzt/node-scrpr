@@ -46,7 +46,7 @@ const scrpr = function(opts){
 	self.needle_opts = {
 		user_agent: "Mozilla/5.0 (compatible; "+pkg.name+"/"+pkg.version+"; +https://npmjs.com/package/"+pkg.name+")",
 	};
-	
+
 	self.concurrency = Math.max((parseInt(opts.concurrency,10)||1),1);
 	self.cachedir = !!opts.cachedir ? path.resolve(opts.cachedir) : path.resolve(path.dirname(require.main.filename), ".scrpr-cache");
 
@@ -68,7 +68,7 @@ const scrpr = function(opts){
 			return a;
 		},{ fn: function(){} });
 		if (!!u && !opt.url) opt.url = u;
-		
+
 		opt.stream = !!(opt.stream || false);
 		opt.cache = (opt.hasOwnProperty("cache") ? !!opt.cache : true);
 		opt.method = opt.method || "get";
@@ -86,7 +86,7 @@ const scrpr = function(opts){
 		opt.metaredirects = (opt.hasOwnProperty("metaredirects")) ? !!opt.metaredirects : ((opt.parse === "dw") || false);
 		opt.iconv = opt.iconv || null;
 		opt.cooldown = opt.cooldown || false;
-				
+
 		const cachefile = path.resolve(self.cachedir, opt.cacheid+".json");
 
 		(function(next){
@@ -113,7 +113,7 @@ const scrpr = function(opts){
 			const headers = { ...self.default_headers };
 			if (opt.cache && cache && cache.hasOwnProperty("etag") && !!cache.etag) headers["If-None-Match"] = cache.etag;
 			else if (opt.cache && cache && cache.hasOwnProperty("modified") && !!cache.modified) headers["If-Modified-Since"] = cache.modified;
-			
+
 			const req_opts = {
 				...self.needle_opts,
 				...opt.needle,
@@ -121,9 +121,9 @@ const scrpr = function(opts){
 				headers: {
 					...opt.headers,
 					...headers
-				}
+				},
 			};
-			
+
 			// raw data as stream
 			if (opt.stream === true || opt.parser === "stream") return (function(){
 
@@ -168,7 +168,7 @@ const scrpr = function(opts){
 
 						// check if module is available
 						if (geturi === null) return fn(new Error("get-uri not available"), false, "error");
-						
+
 						// get ftp resource as stream
 						geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }, function(err, rs) {
 							if (err && err.code === 'ENOTMODIFIED') return fn(null, false, "cache-hit");
@@ -176,7 +176,7 @@ const scrpr = function(opts){
 
 							const stream = (opt.iconv && iconv) ? rs.pipe(iconv.decodeStream(opt.iconv)) : rs;
 							stream.pause();
-				
+
 							// assemble and write cache
 							fs.writeFile(cachefile, JSON.stringify({
 								last: Date.now(),
@@ -186,19 +186,19 @@ const scrpr = function(opts){
 								stream.resume();
 								return fn(null, true, stream, { statusCode: 200, headers: { "last-modified": rs.lastModified } });
 							});
-				
+
 						});
-						
+
 					break;
 					case "file":
 						const file = url.parse(opt.url.replace(/^file:\/+/g,'file:/')).pathname
 
 						fs.stat(file, function(err, stat){
 							if (err) return fn(err, false, "error");
-				
+
 							// generate fake etag from stat
 							const etag = [stat.size, stat.ino, stat.mtime.valueOf()].map(function(v){ return v.toString(36); }).join("-");
-				
+
 							// check etag against cache
 							if (etag === req_opts.headers["If-None-Match"]) return fn(null, false, "cache-hit");
 
@@ -217,14 +217,14 @@ const scrpr = function(opts){
 								stream.resume();
 								return fn(null, true, stream, { statusCode: 200, headers: { "content-length": stat.size, "last-modified": stat.mtime, "etag": etag } });
 							});
-				
+
 						});
 					break;
 					default:
 						fn(new Error("Unknown Protocol"), false, "error");
 					break;
 				};
-				
+
 			})();
 
 			self.request(opt, req_opts, function(err, resp, data){
@@ -233,10 +233,10 @@ const scrpr = function(opts){
 				if (req_opts.headers["If-None-Match"] && resp.headers.etag && resp.headers.etag === req_opts.headers["If-None-Match"]) return fn(null, false, "cache-hit"); // client-side if-none-match, because some servers don't bother
 				if (cache && opt.sizechange && resp.headers.hasOwnProperty("content-length") && cache.hasOwnProperty("size") && cache.size === parseInt(resp.headers["content-length"],10)) return this.destroy(), fn(null, false, "cache-hit"); // assume no change if same size because CDNs are weird
 				if (opt.successCodes.indexOf(resp.statusCode) <0) return fn(new Error("Got Status Code "+resp.statusCode), false, "error");
-				
+
 				// decode
 				if (opt.iconv && iconv) data = iconv.decode(data, opt.iconv);
-				
+
 				// preprocess
 				(function(next){
 					if (!opt.preprocess) return next(data);
@@ -250,12 +250,12 @@ const scrpr = function(opts){
 
 					// calculate hash of raw data
 					const data_hash_raw = self.hash(data);
-				
+
 					// check if raw data changed
 					if (opt.cache && cache && data_hash_raw === cache.hash) return fn(null, false, "no-change");
-				
+
 					(function(next){
-					
+
 						if (!opt.parse) return next(null, data);
 						// parse if needed
 						switch (opt.parse) {
@@ -263,25 +263,25 @@ const scrpr = function(opts){
 							case "tsv":
 							case "ssv":
 								if (xsv === null) return next(new Error("xsv not available"));
-						
+
 								var result = [];
 								xsv({ ...self.xsv_opts[opt.parse], ...opt.xsv }).on("data", function(record){
 									result.push(record);
 								}).on("end", function(){
 									return next(null, result);
 								}).end(data);
-						
+
 							break;
 							case "xlsx":
 								if (xlsx === null) return next(new Error("xlsx not available"));
-							
+
 								// parse xlsx
 								try {
 									var table = xlsx.read(data, { type: 'buffer', cellText: false, cellDates: true });
 								} catch (err) {
 									return next(new Error("XLSX parse error: "+err));
 								}
-							
+
 								// export sheets
 								try {
 									var result = table.SheetNames.reduce(function(records, sheetname){
@@ -290,13 +290,13 @@ const scrpr = function(opts){
 								} catch (err) {
 									return next(new Error("XLSX export error: "+err));
 								}
-							
+
 								return next(null, result);
-							
+
 							break;
 							case "yaml":
 								if (yaml === null) return next(new Error("yaml not available"));
-						
+
 								try {
 									data = yaml.parse(data);
 								} catch (err) {
@@ -308,7 +308,7 @@ const scrpr = function(opts){
 							break;
 							case "html":
 								if (cheerio === null) return next(new Error("cheerio not available"));
-						
+
 								try {
 									data = cheerio.load(data);
 								} catch (err) {
@@ -323,7 +323,7 @@ const scrpr = function(opts){
 							break;
 							case "dw":
 								if (dw === null) return next(new Error("dataunwrapper not available"));
-						
+
 								// use dataunwrapper
 								dw.extract(data, function(err, data){
 									if (err) return next(err);
@@ -333,7 +333,7 @@ const scrpr = function(opts){
 										data = JSON.parse(data);
 										return next(null, data);
 									} catch (err) {
-										
+
 										// probably csv
 										var result = [];
 										xsv({ ...self.xsv_opts["csv"] }).on("data", function(record){
@@ -341,7 +341,7 @@ const scrpr = function(opts){
 										}).on("end", function(){
 											return next(null, result);
 										}).end(data);
-										
+
 									}
 
 								});
@@ -363,7 +363,7 @@ const scrpr = function(opts){
 								} catch (err) {
 									return next(err);
 								}
-								
+
 								return next(((data.errors instanceof Array && data.errors.length && data.errors) || null), data.output);
 							break;
 							case "json":
@@ -380,7 +380,7 @@ const scrpr = function(opts){
 								return next(null, data);
 							break;
 						}
-					
+
 					})(function(err, data){
 						if (err) return fn(err, false, "error");
 
@@ -390,12 +390,12 @@ const scrpr = function(opts){
 						// check for processing function
 						(function(next){
 							if (!opt.process) return next(data);
-						
+
 							opt.process(data, function(err, data){
 								if (err) return fn(err, false, "error");
 								return next(data);
 							}, resp);
-						
+
 						})(function(data){
 
 							// create hash of processed data
@@ -416,15 +416,15 @@ const scrpr = function(opts){
 								if (err) console.error("Unable to write cache file: %s – %s", cachefile, err);
 								return fn(null, true, data);
 							});
-						
+
 						});
 					});
 				});
 			});
 		});
-		
+
 		return self;
-		
+
 	};
 };
 
@@ -442,7 +442,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 
 			needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
 				if (!opt.metaredirects || err || resp.statusCode !== 200 || resp.headers["content-type"] !== "text/html") return fn.apply(this, arguments);
-		
+
 				if (!/(<meta[^>]+http-equiv="refresh"[^>]*>)/i.test(data)) return fn.apply(this, arguments);;
 				if (!/content="([0-9]+;\s*)?url=([^"]+)"/i.test(RegExp.$1)) return fn.apply(this, arguments);;
 
@@ -458,11 +458,11 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 		break;
 		case "ftp":
 			if (geturi === null) return fn(new Error("get-uri not available"), { statusCode: 500 }, null);
-						
+
 			geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }, function(err, stream) {
 				if (err && err.code === 'ENOTMODIFIED') return fn(null, { statusCode: 304 }, null);
 				if (err) return fn(err, {}, null);
-				
+
 				// capture data
 				const data = [];
 				stream.on('data', function(chunk){
@@ -470,36 +470,36 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 				}).on('end', function(){
 
 					// simulate bare minimum needle callback
-					fn(null, { 
+					fn(null, {
 						statusCode: 200,
 						headers: {
 							"content-type": (mime.lookup(path.extname(url.parse(opt.url).pathname))||"application/octet-stream"),
 							"last-modified": stream.lastModified,
 						}
 					}, Buffer.concat(data));
-					
+
 				});
-				
+
 			});
-			
+
 		break;
 		case "file":
 			const file = url.parse(opt.url.replace(/^file:\/+/g,'file:/')).pathname
 
 			fs.stat(file, function(err, stat){
 				if (err) return fn(err, { statusCode: 500 }, null);
-				
+
 				// generate fake etag from stat
 				const etag = [stat.size, stat.ino, stat.mtime.valueOf()].map(function(v){ return v.toString(36); }).join("-");
-				
+
 				// check etag against cache
 				if (etag === req_opts.headers["If-None-Match"]) return fn(null, { statusCode: 304 }, null);
-				
+
 				fs.readFile(file, function(err, contents){
 					if (err) return fn(err, { statusCode: 500 }, null);
-					
+
 					// simulate bare minimum needle callback
-					fn(null, { 
+					fn(null, {
 						statusCode: 200,
 						headers: {
 							"last-modified": stat.mtime,
@@ -510,14 +510,14 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 					}, contents);
 
 				});
-				
+
 			});
 		break;
 		default:
 			return fn(new Error("Unknown Protocol"));
 		break;
 	}
-	
+
 };
 
 // hash helper
