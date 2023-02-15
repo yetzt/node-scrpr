@@ -1,6 +1,6 @@
 {
   "name": "scrpr",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "a scraper multitool",
   "main": "scrpr.js",
   "scripts": {},
@@ -21,14 +21,16 @@
     "xlsx": "^0.18.5",
     "xml2js": "^0.4.23",
     "xsv": "^0.0.6",
-    "yaml": "^2.0.0"
+    "yaml": "^2.2.1"
   },
   "keywords": [
     "scraper",
     "scrape",
     "ddj",
     "crawler",
-    "scraping"
+    "scraping",
+    "data",
+    "tool"
   ],
   "repository": {
     "type": "git",
