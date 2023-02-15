@@ -102,6 +102,8 @@ const scrpr = function(opts){
 			// cooldown
 			if (opt.cooldown && cache && cache.hasOwnProperty("last") && cache.last+opt.cooldown > Date.now()) return fn(null, false, "cooldown");
 
+			const protocol = url.parse(opt.url).protocol.slice(0,-1);
+
 			const headers = { ...self.default_headers };
 			if (opt.cache && cache && cache.hasOwnProperty("etag") && !!cache.etag) headers["If-None-Match"] = cache.etag;
 			else if (opt.cache && cache && cache.hasOwnProperty("modified") && !!cache.modified) headers["If-Modified-Since"] = cache.modified;
@@ -119,10 +121,9 @@ const scrpr = function(opts){
 			// raw data as stream
 			if (opt.stream === true || opt.parser === "stream") return (function(){
 
-				switch (url.parse(opt.url).protocol) {
-					case "http:":
-					case "https:":
-						
+				switch (protocol) {
+					case "http":
+					case "https":
 						needle.request(opt.method, opt.url, opt.data, req_opts).on("error", function(err){
 							return fn(err, false, "error");
 						}).on("response", function(resp){
@@ -154,7 +155,7 @@ const scrpr = function(opts){
 						});
 
 					break;
-					case "ftp:":
+					case "ftp":
 
 						// check if module is available
 						if (geturi === null) return fn(new Error("get-uri not available"), false, "error");
@@ -180,7 +181,7 @@ const scrpr = function(opts){
 						});
 						
 					break;
-					case "file:":
+					case "file":
 						const file = url.parse(opt.url.replace(/^file:\/+/g,'file:/')).pathname
 
 						fs.stat(file, function(err, stat){
@@ -421,10 +422,14 @@ const scrpr = function(opts){
 // request, but with following html meta redirects
 scrpr.prototype.request = function(opt, req_opts, fn){
 	const self = this;
-	
-	switch (url.parse(opt.url).protocol) {
-		case "http:":
-		case "https:":
+
+	const protocol = url.parse(opt.url).protocol.slice(0,-1);
+
+	switch (protocol) {
+		case "http":
+		case "https":
+
+			req_opts.agent = agents[protocol];
 
 			needle.request(opt.method, opt.url, opt.data, req_opts, function(err, resp, data){
 				if (!opt.metaredirects || err || resp.statusCode !== 200 || resp.headers["content-type"] !== "text/html") return fn.apply(this, arguments);
@@ -442,7 +447,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 				return fn(err), fn = function(){};
 			});
 		break;
-		case "ftp:":
+		case "ftp":
 			if (geturi === null) return fn(new Error("get-uri not available"), { statusCode: 500 }, null);
 						
 			geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }, function(err, stream) {
@@ -469,7 +474,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 			});
 			
 		break;
-		case "file:":
+		case "file":
 			const file = url.parse(opt.url.replace(/^file:\/+/g,'file:/')).pathname
 
 			fs.stat(file, function(err, stat){
