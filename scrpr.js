@@ -18,7 +18,7 @@ const agents = {
 
 // optional deps (wish there was a nicer pattern)
 const cheerio = (function(){ try { return require("cheerio"); } catch (e) { return null; }})();
-const geturi = (function(){ try { return require("get-uri"); } catch (e) { return null; }})();
+const geturi = (function(){ try { return require("get-uri").getUri; } catch (e) { return null; }})();
 const iconv = (function(){ try { return require("iconv-lite"); } catch (e) { return null; }})();
 const xlsx = (function(){ try { return require("xlsx"); } catch (e) { return null; }})();
 const yaml = (function(){ try { return require("yaml"); } catch (e) { return null; }})();
@@ -170,7 +170,7 @@ const scrpr = function(opts){
 						if (geturi === null) return fn(new Error("get-uri not available"), false, "error");
 
 						// get ftp resource as stream
-						geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }, function(err, rs) {
+						geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }).then(function(err, rs) {
 							if (err && err.code === 'ENOTMODIFIED') return fn(null, false, "cache-hit");
 							if (err) return fn(err, {}, null);
 
@@ -187,6 +187,8 @@ const scrpr = function(opts){
 								return fn(null, true, stream, { statusCode: 200, headers: { "last-modified": rs.lastModified } });
 							});
 
+						}).catch(function(err){
+							return fn(err, {}, null);
 						});
 
 					break;
