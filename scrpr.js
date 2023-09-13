@@ -1,8 +1,8 @@
 
-const fs = require("fs");
-const url = require("url");
-const path = require("path");
-const crypto = require("crypto");
+const fs = require("node:fs");
+const url = require("node:url");
+const path = require("node:path");
+const crypto = require("node:crypto");
 
 const pkg = require("./package.json");
 
