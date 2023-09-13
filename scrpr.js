@@ -10,10 +10,13 @@ const quu = require("quu");
 const needle = require("needle");
 const mime = require("mime-types");
 
+const httpAgent = require("node:http").Agent;
+const httpsAgent = require("node:https").Agent;
+
 // agents
 const agents = {
-	http: require("http").Agent({ keepAlive: true }),
-	https: require("https").Agent({ keepAlive: true }),
+	http: new httpAgent({ keepAlive: true }),
+	https: new httpsAgent({ keepAlive: true }),
 };
 
 // optional deps (wish there was a nicer pattern)
