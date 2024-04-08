@@ -1,6 +1,6 @@
 {
   "name": "scrpr",
-  "version": "0.1.24",
+  "version": "0.1.25",
   "description": "a scraper multitool",
   "main": "scrpr.js",
   "scripts": {},
@@ -8,20 +8,20 @@
   "license": "UNLICENSE",
   "dependencies": {
     "mime-types": "^2.1.35",
-    "needle": "^3.2.0",
+    "needle": "^3.3.1",
     "quu": "^0.4.2"
   },
   "optionalDependencies": {
     "cheerio": "^1.0.0-rc.10",
     "dataunwrapper": "^0.0.6",
-    "get-uri": "^6.0.1",
+    "get-uri": "^6.0.3",
     "iconv-lite": "^0.6.3",
-    "kdljs": "^0.1.1",
+    "kdljs": "^0.2.0",
     "pdf.js-extract": "^0.2.1",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
     "xml2js": "^0.6.2",
     "xsv": "^0.0.6",
-    "yaml": "^2.3.2"
+    "yaml": "^2.4.1"
   },
   "keywords": [
     "scraper",
@@ -34,6 +34,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yetzt/node-scrpr"
+    "url": "git+https://github.com/yetzt/node-scrpr.git"
   }
 }
