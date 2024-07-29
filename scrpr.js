@@ -464,9 +464,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 		case "ftp":
 			if (geturi === null) return fn(new Error("get-uri not available"), { statusCode: 500 }, null);
 
-			geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }, function(err, stream) {
-				if (err && err.code === 'ENOTMODIFIED') return fn(null, { statusCode: 304 }, null);
-				if (err) return fn(err, {}, null);
+			geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }).then(function(err, stream) {
 
 				// capture data
 				const data = [];
@@ -485,6 +483,9 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 
 				});
 
+			}).catch(function(err){
+				if (err.code === 'ENOTMODIFIED') return fn(null, { statusCode: 304 }, null);
+				return fn(err, {}, null);
 			});
 
 		break;
