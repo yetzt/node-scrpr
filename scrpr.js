@@ -464,7 +464,7 @@ scrpr.prototype.request = function(opt, req_opts, fn){
 		case "ftp":
 			if (geturi === null) return fn(new Error("get-uri not available"), { statusCode: 500 }, null);
 
-			geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }).then(function(err, stream) {
+			geturi(opt.url, { cache: { lastModified: req_opts.headers["If-Modified-Since"], } }).then(function(stream) {
 
 				// capture data
 				const data = [];
