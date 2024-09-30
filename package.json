@@ -12,7 +12,7 @@
     "quu": "^0.4.2"
   },
   "optionalDependencies": {
-    "cheerio": "^1.0.0-rc.10",
+    "cheerio": "^1.0.0",
     "dataunwrapper": "^0.0.6",
     "get-uri": "^6.0.3",
     "iconv-lite": "^0.6.3",
@@ -21,7 +21,7 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
     "xml2js": "^0.6.2",
     "xsv": "^0.0.6",
-    "yaml": "^2.5.0"
+    "yaml": "^2.5.1"
   },
   "keywords": [
     "scraper",
