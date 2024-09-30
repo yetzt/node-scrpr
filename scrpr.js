@@ -31,6 +31,8 @@ const pdf = (function(){ try { return require("pdf.js-extract").PDFExtract; } ca
 const kdl = (function(){ try { return require("kdljs").parse; } catch (e) { return null; }})();
 const dw = (function(){ try { return require("dataunwrapper"); } catch (e) { return null; }})();
 
+const maxstr = (Math.pow(2,29)-24); // maximum string size
+
 const scrpr = function(opts){
 	if (!(this instanceof scrpr)) return new scrpr(opts);
 	const self = this;
@@ -389,8 +391,8 @@ const scrpr = function(opts){
 					})(function(err, data){
 						if (err) return fn(err, false, "error");
 
-						// convert xml and json formats to strings (needle only converts text/* mime types)
-						if (data instanceof Buffer && resp.headers.hasOwnProperty("content-type") && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
+						// convert xml and json formats to strings (needle only converts text/* mime types) if the buffer does not exceed node's maximum string size
+						if (data instanceof Buffer && (data.length <= maxstr) && resp.headers.hasOwnProperty("content-type") && (["json","xml"].indexOf(resp.headers["content-type"].split(";").shift().split(/\/|\+/).pop()) >= 0)) data = data.toString();
 
 						// check for processing function
 						(function(next){
